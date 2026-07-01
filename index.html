@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vercel OTP Login via SMSGate</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #121212; color: white; margin: 0; }
+        .login-card { background: #1e1e1e; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center; width: 320px; }
+        h2 { margin-bottom: 20px; font-weight: 500; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 4px; border: 1px solid #333; background: #2b2b2b; color: white; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; background-color: #00bfa5; border: none; color: white; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px; transition: background 0.2s; }
+        button:hover { background-color: #009688; }
+        .message { margin-top: 15px; font-size: 14px; min-height: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <h2>Login via OTP</h2>
+    <input type="tel" id="phoneNumber" placeholder="Enter Phone Number (e.g. +91...)">
+    <button onclick="sendOTP()">Send OTP</button>
+    <div class="message" id="statusMessage"></div>
+</div>
+
+<script>
+async function sendOTP() {
+    const phone = document.getElementById('phoneNumber').value.trim();
+    const statusMsg = document.getElementById('statusMessage');
+
+    if (!phone) {
+        statusMsg.innerText = "Please enter a phone number.";
+        statusMsg.style.color = "#ff5252";
+        return;
+    }
+
+    statusMsg.innerText = "Sending OTP...";
+    statusMsg.style.color = "#ffd740";
+
+    // 4-Digit OTP generate karna
+    const generatedOTP = Math.floor(1000 + Math.random() * 9000);
+
+    try {
+        // Vercel ke serverless api endpoint ko hit karna
+        const response = await fetch('/api/send-otp', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                phone: phone, 
+                otp: generatedOTP 
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            statusMsg.innerText = "OTP Sent Successfully! Check your phone.";
+            statusMsg.style.color = "#69f0ae";
+            console.log("Debug - Sent OTP is:", generatedOTP);
+        } else {
+            statusMsg.innerText = "Failed: " + (data.message || "Status " + response.status);
+            statusMsg.style.color = "#ff5252";
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        statusMsg.innerText = "Error connecting to server.";
+        statusMsg.style.color = "#ff5252";
+    }
+}
+</script>
+
+</body>
+</html>
