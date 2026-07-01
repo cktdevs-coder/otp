@@ -7,26 +7,25 @@ export default async function handler(req, res) {
     try {
         const { phone, otp } = req.body;
 
+        const APP_USERNAME = "KA_9VY";
         const APP_PASSWORD = "5cjvopxs0cwimr";
         const DEVICE_ID = "U-M0c38ptXXvTstDccJAJ";
 
-        // SMSGate documentation ke 'smsgateway.Message' model ke mutabik payload
+        // SMSGate documentation ke mutabik proper message body format
         const smsPayload = {
             device_id: DEVICE_ID,
             recipients: [phone],
             message: `Your login OTP is: ${otp}. Do not share it.`
         };
 
-        console.log("Sending SMS directly to SMSGate Cloud...");
+        console.log("Sending SMS via Basic Auth (Username:Password)...");
 
-        // Hum yahan direct Messages endpoint ko hit kar rahe hain
-        // Aur Basic Authentication me Device ID aur Password bhej rahe hain
+        // Yahan standard Basic Auth Username aur Password ke saath bhej rahe hain
         const response = await fetch('https://api.sms-gate.app/3rdparty/v1/messages', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                // Basic Auth header format: btoa("DeviceID:Password")
-                'Authorization': 'Basic ' + Buffer.from(`${DEVICE_ID}:${APP_PASSWORD}`).toString('base64')
+                'Authorization': 'Basic ' + Buffer.from(`${APP_USERNAME}:${APP_PASSWORD}`).toString('base64')
             },
             body: JSON.stringify(smsPayload)
         });
