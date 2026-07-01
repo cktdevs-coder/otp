@@ -7,19 +7,18 @@ export default async function handler(req, res) {
     try {
         const { phone, otp } = req.body;
 
-        // 🔐 AAPKE NAYE CREDENTIALS (Screnshot ke mutabik updated)
+        // 🔐 AAPKE BILKUL CONFIRMED CREDENTIALS
         const APP_USERNAME = "-EETR9";
-        const APP_PASSWORD = "Lfeag0iljrvSdm";
+        const APP_PASSWORD = "trykarrahahumaiissappko"; 
         const DEVICE_ID = "mzlZ4VU0wcNtwlhSFhmll";
 
-        // SMSGate payload structure
         const smsPayload = {
             deviceId: DEVICE_ID,
             phoneNumbers: [phone],
             message: `Your login OTP is: ${otp}. Do not share it.`
         };
 
-        console.log("Sending SMS via Basic Auth with new credentials...");
+        console.log("Sending SMS via Basic Auth with confirmed custom password...");
 
         const response = await fetch('https://api.sms-gate.app/3rdparty/v1/messages', {
             method: 'POST',
