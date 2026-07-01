@@ -1,15 +1,12 @@
 // api/send-otp.js
 export default async function handler(req, res) {
-    // Sirf POST requests ko allow karne ke liye
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method Not Allowed' });
     }
 
     try {
-        // Frontend se bheja gaya data (body) nikalna
         const { phone, otp } = req.body;
 
-        // SMSGate API ke liye payload data
         const payload = {
             username: "KA_9VY",
             password: "5cjvopxs0cwimr",
@@ -18,8 +15,9 @@ export default async function handler(req, res) {
             message: `Your login OTP is: ${otp}. Do not share it.`
         };
 
-        // SMSGate Cloud Server ko secure network request bhejna
-        const response = await fetch('https://api.sms-gate.app/v1/send', {
+        // Koshish 1: Standard API Gateway Path (/api/v1/send)
+        // Agar aapke app ka documentation /send bolta hai, toh niche wale URL me se /api badha/ghata sakte hain
+        const response = await fetch('https://api.sms-gate.app/api/v1/send', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json' 
@@ -27,9 +25,15 @@ export default async function handler(req, res) {
             body: JSON.stringify(payload)
         });
 
-        const data = await response.json();
+        const responseText = await response.text();
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (e) {
+            data = { message: responseText };
+        }
 
-        // Jo response SMSGate se aaya, wahi frontend ko lauta dena
         return res.status(response.status).json(data);
 
     } catch (error) {
