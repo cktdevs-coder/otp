@@ -7,18 +7,19 @@ export default async function handler(req, res) {
     try {
         const { phone, otp } = req.body;
 
-        const APP_USERNAME = "KA_9VY";
-        const APP_PASSWORD = "5cjvopxs0cwimr";
-        const DEVICE_ID = "U-M0c38ptXXvTstDccJAJ";
+        // 🔐 AAPKE NAYE CREDENTIALS (Screnshot ke mutabik updated)
+        const APP_USERNAME = "-EETR9";
+        const APP_PASSWORD = "Lfeag0iljrvSdm";
+        const DEVICE_ID = "mzlZ4VU0wcNtwlhSFhmll";
 
-        // SMSGate ke exact internal structure ke hisab se validation pass karne ke liye payload
+        // SMSGate payload structure
         const smsPayload = {
             deviceId: DEVICE_ID,
-            phoneNumbers: [phone], // Error ke mutabik 'phoneNumbers' array format me compulsory hai
+            phoneNumbers: [phone],
             message: `Your login OTP is: ${otp}. Do not share it.`
         };
 
-        console.log("Sending SMS payload with correct keys...");
+        console.log("Sending SMS via Basic Auth with new credentials...");
 
         const response = await fetch('https://api.sms-gate.app/3rdparty/v1/messages', {
             method: 'POST',
