@@ -7,67 +7,43 @@ export default async function handler(req, res) {
     try {
         const { phone, otp } = req.body;
 
-        const APP_USERNAME = "KA_9VY";
         const APP_PASSWORD = "5cjvopxs0cwimr";
         const DEVICE_ID = "U-M0c38ptXXvTstDccJAJ";
 
-        console.log("Generating Auth Token...");
-        
-        // Yahan hum standard properties dono bhej rahe hain (username bhi aur login bhi)
-        // Taaki API jo bhi expect kar rahi ho, use mil jaye.
-        const tokenPayload = {
-            username: APP_USERNAME,
-            login: APP_USERNAME, 
-            password: APP_PASSWORD
-        };
-
-        const tokenResponse = await fetch('https://api.sms-gate.app/3rdparty/v1/auth/token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(tokenPayload)
-        });
-
-        const tokenErrText = await tokenResponse.text();
-
-        if (!tokenResponse.ok) {
-            return res.status(tokenResponse.status).json({ 
-                message: "Authentication failed with SMSGate", 
-                details: tokenErrText // Yeh line ab aapko exact reason batayegi ki kyu fail hua
-            });
-        }
-
-        const tokenData = JSON.parse(tokenErrText);
-        const token = tokenData.token || tokenData.accessToken; 
-
-        console.log("Sending SMS to queue...");
-        
+        // SMSGate documentation ke 'smsgateway.Message' model ke mutabik payload
         const smsPayload = {
             device_id: DEVICE_ID,
             recipients: [phone],
             message: `Your login OTP is: ${otp}. Do not share it.`
         };
 
-        const smsResponse = await fetch('https://api.sms-gate.app/3rdparty/v1/messages', {
+        console.log("Sending SMS directly to SMSGate Cloud...");
+
+        // Hum yahan direct Messages endpoint ko hit kar rahe hain
+        // Aur Basic Authentication me Device ID aur Password bhej rahe hain
+        const response = await fetch('https://api.sms-gate.app/3rdparty/v1/messages', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                // Basic Auth header format: btoa("DeviceID:Password")
+                'Authorization': 'Basic ' + Buffer.from(`${DEVICE_ID}:${APP_PASSWORD}`).toString('base64')
             },
             body: JSON.stringify(smsPayload)
         });
 
-        const smsResponseText = await smsResponse.text();
-        let smsData;
+        const responseText = await response.text();
+        
+        let data;
         try {
-            smsData = JSON.parse(smsResponseText);
+            data = JSON.parse(responseText);
         } catch (e) {
-            smsData = { message: smsResponseText };
+            data = { message: responseText };
         }
 
-        return res.status(smsResponse.status).json(smsData);
+        return res.status(response.status).json(data);
 
     } catch (error) {
-        console.error("Vercel Function Error:", error);
+        console.error("Vercel Direct Cloud Error:", error);
         return res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 }
