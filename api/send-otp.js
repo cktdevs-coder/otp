@@ -9,19 +9,16 @@ export default async function handler(req, res) {
 
         const APP_USERNAME = "-EETR9";
         const APP_PASSWORD = "trykarrahahumaiissappko"; 
-        
-        // ⚠️ Ek baar app me check kar lein ki yehi ID hai na:
         const DEVICE_ID = "mzlZ4VU0wcNtwlhSFhmll"; 
 
-        // Hum dono camelCase aur snake_case bhej rahe hain taaki device select ho jaye
+        // Strictly clean standard payload for smsgateway.Message model
         const smsPayload = {
             deviceId: DEVICE_ID,
-            device_id: DEVICE_ID,
-            phoneNumbers: [phone],
-            message: `Your login OTP is: ${otp}. Do not share it.`
+            phoneNumbers: [String(phone).trim()], // array within clean string
+            message: String(`Your login OTP is: ${otp}. Do not share it.`)
         };
 
-        console.log("Sending SMS - Validating Device ID...");
+        console.log("Sending clean SMS payload...");
 
         const response = await fetch('https://api.sms-gate.app/3rdparty/v1/messages', {
             method: 'POST',
